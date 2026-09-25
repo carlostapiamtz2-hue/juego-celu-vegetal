@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#087443">
+<title>🌿 Célula Vegetal - Juego</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#eaf9ef;color:#14382a;font-family:Arial,sans-serif}
+header{background:linear-gradient(145deg,#087443,#27a85f);color:white;text-align:center;padding:24px 14px}
+h1{font-size:clamp(27px,8vw,45px);margin:0 0 8px}
+header p{margin:0;font-size:16px}
+main{width:min(760px,100%);margin:auto;padding:12px}
+.card{background:white;border-radius:22px;padding:18px;margin:12px 0;box-shadow:0 7px 25px #12372a1c}
+h2{margin-top:0}
+.instr{display:grid;gap:9px}
+.instr div{background:#effaf2;padding:12px;border-radius:13px}
+button{font:inherit;font-weight:800;border:0;border-radius:16px;min-height:58px;padding:13px 16px;touch-action:manipulation}
+.start,.next,.again{background:#087443;color:white;width:100%;margin-top:14px}
+.question{font-size:21px;font-weight:900;line-height:1.35;margin:18px 0}
+.answers{display:grid;gap:11px}
+.answer{text-align:left;background:#f7faf8;border:2px solid #d7e8dc;width:100%}
+.answer:active{transform:scale(.98)}
+.correct{background:#d9f7e3!important;border-color:#22a65b!important}
+.wrong{background:#ffe0e0!important;border-color:#e05252!important}
+.top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:900}
+.progress{height:11px;background:#e2ebe5;border-radius:20px;margin-top:13px;overflow:hidden}
+.bar{height:100%;width:0;background:#8bd450}
+.feedback{font-weight:800;line-height:1.4;min-height:52px;margin-top:13px}
+.hidden{display:none}
+.score{font-size:36px;font-weight:900;color:#087443;text-align:center}
+.feature{background:#f1faf4;padding:11px;border-radius:12px;margin:7px 0}
+small{display:block;text-align:center;padding:20px;color:#557064}
+@media(min-width:650px){.answers{grid-template-columns:1fr 1fr}.instr{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>🌿 Exploradores de la Célula Vegetal</h1>
+<p>Juego educativo • 20 misiones • ¡Aprende jugando!</p>
+</header>
+<main>
+<section id="home" class="card">
+<h2>🎯 ¿Qué aprenderás?</h2>
+<p>Identificar <b>20 características y estructuras de la célula vegetal</b>, comprender sus funciones y relacionarlas con la vida de las plantas.</p>
+<h2>📘 ¿Cómo se juega?</h2>
+<div class="instr">
+<div>1️⃣ <b>Lee</b> la pregunta.</div>
+<div>2️⃣ <b>Toca</b> una de las cuatro respuestas.</div>
+<div>3️⃣ <b>Descubre</b> la explicación.</div>
+<div>4️⃣ <b>Completa</b> las 20 misiones.</div>
+<div>5️⃣ <b>Gana</b> hasta 200 puntos.</div>
+</div>
+<button class="start" onclick="start()">🚀 COMENZAR</button>
+</section>
+
+<section id="game" class="card hidden">
+<div class="top"><span id="mission"></span><span>⭐ <span id="score">0</span></span></div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div id="q" class="question"></div>
+<div id="answers" class="answers"></div>
+<div id="feedback" class="feedback"></div>
+<button id="next" class="next hidden" onclick="next()">➡️ SIGUIENTE</button>
+</section>
+
+<section id="end" class="card hidden">
+<h2 style="text-align:center">🎉 ¡Misión completada!</h2>
+<div class="score"><span id="final">0</span> / 200</div>
+<p id="message" style="text-align:center;font-weight:800"></p>
+<button class="again" onclick="start()">🔄 JUGAR DE NUEVO</button>
+<button class="again" onclick="review()">📚 REPASAR LAS 20 CARACTERÍSTICAS</button>
+<div id="reviewBox"></div>
+</section>
+<small>Diseñado para funcionar sin internet en celulares, tablets y laptops.</small>
+</main>
+<script>
+const D=[
+["¿Qué estructura da rigidez y forma a la célula vegetal?","Pared celular","Ribosoma","Nucléolo","Cilios","La pared celular aporta soporte, protección y forma."],
+["¿Qué estructura controla qué sustancias entran y salen?","Membrana plasmática","Pared celular","Vacuola","Cloroplasto","La membrana plasmática regula el intercambio de sustancias."],
+["¿Qué estructura contiene la mayor parte del ADN y dirige muchas actividades?","Núcleo","Cloroplasto","Vacuola","Ribosoma","El núcleo contiene el material genético y coordina muchas actividades."],
+["¿Qué orgánulo realiza la fotosíntesis?","Cloroplasto","Mitocondria","Núcleo","Aparato de Golgi","Los cloroplastos captan energía luminosa para realizar la fotosíntesis."],
+["¿Qué pigmento permite captar principalmente la luz?","Clorofila","Hemoglobina","Queratina","Melanina","La clorofila es el pigmento verde que absorbe luz."],
+["¿Qué estructura almacena agua, sales y otras sustancias?","Vacuola central","Ribosoma","Nucléolo","Centriolo","La gran vacuola central ayuda al almacenamiento."],
+["¿Qué ayuda a mantener la presión interna de la célula?","Agua en la vacuola","ADN","Clorofila","ARN","El agua de la vacuola contribuye a la turgencia."],
+["¿Qué orgánulo produce gran parte del ATP mediante respiración celular?","Mitocondria","Cloroplasto","Núcleo","Pared celular","Las mitocondrias producen ATP para las actividades celulares."],
+["¿Qué estructura fabrica proteínas?","Ribosomas","Vacuolas","Cloroplastos","Lisosomas","Los ribosomas participan en la síntesis de proteínas."],
+["¿Qué red membranosa participa en la fabricación y transporte de sustancias?","Retículo endoplasmático","Pared celular","Vacuola","Nucléolo","El retículo endoplasmático participa en síntesis y transporte."],
+["¿Qué orgánulo modifica, clasifica y empaqueta sustancias?","Aparato de Golgi","Núcleo","Cloroplasto","Ribosoma","El aparato de Golgi procesa y distribuye materiales."],
+["¿Qué componente contiene la información genética?","ADN","Celulosa","Clorofila","ATP","El ADN contiene la información genética."],
+["¿Qué polisacárido es componente principal de la pared celular?","Celulosa","Glucógeno","Quitina","Almidón","La celulosa forma gran parte de la pared celular."],
+["¿Qué proceso transforma energía luminosa en energía química?","Fotosíntesis","Difusión","Respiración","Ósmosis","La fotosíntesis utiliza la energía de la luz para formar compuestos orgánicos."],
+["¿Qué gas se utiliza como materia prima en la fotosíntesis?","Dióxido de carbono","Oxígeno","Nitrógeno","Helio","El dióxido de carbono aporta carbono para formar moléculas orgánicas."],
+["¿Qué gas se libera principalmente durante la fotosíntesis?","Oxígeno","Dióxido de carbono","Nitrógeno","Hidrógeno","El oxígeno se produce durante las reacciones de la fotosíntesis."],
+["¿Qué característica distingue a muchas células vegetales?","Pared celular y cloroplastos","Ausencia de ADN","Ausencia de membrana","Falta de citoplasma","Las células vegetales presentan pared celular y, en tejidos fotosintéticos, cloroplastos."],
+["¿Qué medio gelatinoso contiene los orgánulos?","Citoplasma","Pared celular","ADN","Clorofila","El citoplasma contiene los orgánulos y es escenario de muchas reacciones."],
+["¿Qué característica permite intercambio de señales y sustancias entre células?","Comunicación celular","Fotosíntesis","Rigidez","Color verde","Las células vegetales pueden comunicarse mediante estructuras y señales celulares."],
+["¿Por qué la célula vegetal es la unidad básica de los vegetales?","Porque realiza funciones vitales","Porque siempre es verde","Porque solo almacena agua","Porque no necesita energía","La célula realiza funciones esenciales como obtener energía, crecer y responder al ambiente."]
+];
+let n=0,pts=0,done=false;
+function start(){n=0;pts=0;document.getElementById("home").classList.add("hidden");document.getElementById("end").classList.add("hidden");document.getElementById("game").classList.remove("hidden");draw();}
+function draw(){done=false;let d=D[n];document.getElementById("mission").textContent="Misión "+(n+1)+" de 20";document.getElementById("score").textContent=pts;document.getElementById("bar").style.width=(n/20*100)+"%";document.getElementById("q").textContent=d[0];let box=document.getElementById("answers");box.innerHTML="";[d[1],d[2],d[3],d[4]].sort(()=>Math.random()-.5).forEach(a=>{let b=document.createElement("button");b.className="answer";b.textContent=a;b.onclick=()=>answer(b,a===d[1],d[5]);box.appendChild(b)});document.getElementById("feedback").textContent="";document.getElementById("next").classList.add("hidden");}
+function answer(btn,ok,why){if(done)return;done=true;document.querySelectorAll(".answer").forEach(x=>x.disabled=true);if(ok){pts+=10;btn.classList.add("correct");document.getElementById("feedback").textContent="✅ ¡Correcto! "+why}else{btn.classList.add("wrong");document.getElementById("feedback").textContent="💡 "+why}document.getElementById("score").textContent=pts;document.getElementById("next").classList.remove("hidden")}
+function next(){if(n<19){n++;draw()}else{document.getElementById("game").classList.add("hidden");document.getElementById("end").classList.remove("hidden");document.getElementById("final").textContent=pts;document.getElementById("message").textContent=pts>=180?"🌟 ¡Excelente dominio!":pts>=140?"🌿 ¡Muy buen trabajo!":pts>=100?"🌱 ¡Buen avance!":"🔎 ¡Sigue explorando y vuelve a intentarlo!";}}
+function review(){document.getElementById("reviewBox").innerHTML="<h3>📚 Repaso</h3>"+D.map((x,i)=>'<div class="feature"><b>'+(i+1)+'. '+x[1]+'</b><br>'+x[5]+'</div>').join("")}
+</script>
+</body>
+</html>
